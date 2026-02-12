@@ -7,21 +7,33 @@ public class BouncySurface : MonoBehaviour
     
     public float bounceStrength;
     private float baseBounceStrength;
+    public AudioClip collisionSound;
+    public float basePitch;
+    private float pitch;
+    
+    AudioSource AudioSource;
 
     void Start()
     {
+        AudioSource = GetComponent<AudioSource>();
+        
         baseBounceStrength = bounceStrength;
+        pitch = basePitch;
+        
         StartCoroutine(IncreaseSpeed());
+        StartCoroutine(RaisePitch());
     }
 
     void OnEnable()
     {
         BallLogic.OnScore += resetBounceStrength;
+        BallLogic.OnScore += resetPitch;
     }
 
     void OnDisable()
     {
         BallLogic.OnScore -= resetBounceStrength;
+        BallLogic.OnScore -= resetPitch;
     }
 
     // Waits 5 seconds before increasing bounceStrength
@@ -35,6 +47,16 @@ public class BouncySurface : MonoBehaviour
         }
     }
 
+    IEnumerator RaisePitch()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(10f);
+            
+            pitch = pitch * 1.05f;
+        }
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         BallLogic ball = collision.gameObject.GetComponent<BallLogic>();
@@ -44,11 +66,20 @@ public class BouncySurface : MonoBehaviour
         {
             Vector3 normal = collision.GetContact(0).normal;
             ball.AddForce(-normal * bounceStrength);
+            
+            AudioSource.pitch = pitch;
+            AudioSource.PlayOneShot(collisionSound);
         }
     }
 
     public void resetBounceStrength()
     {
         bounceStrength = baseBounceStrength;
+        
+    }
+
+    public void resetPitch()
+    {
+        pitch = basePitch;
     }
 }

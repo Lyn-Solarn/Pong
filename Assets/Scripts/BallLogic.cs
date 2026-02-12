@@ -14,9 +14,15 @@ public class BallLogic : MonoBehaviour
     // -1f = LeftSide Loser, 1f = RightSide Loser
     private float currentLoser = 1f;
     public float speed = 200f;
-    public TextMeshProUGUI scores;
+    
+    public TextMeshProUGUI leftScoreText;
+    public TextMeshProUGUI rightScoreText;
+    public Color32[] colors;
+    
     public GameObject leftWin;
     public GameObject rightWin;
+    
+    AudioSource AudioSource;
 
     public static event Action OnScore;
     
@@ -25,6 +31,22 @@ public class BallLogic : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         currentLoser = Random.value < 0.5f ? 1f : -1f;
+        AudioSource = GetComponent<AudioSource>();
+        
+        colors = new Color32[11]
+        {
+            new Color32(255, 255, 255, 255),
+            new Color32(255, 165, 0, 255),
+            new Color32(255, 255, 0, 255),
+            new Color32(0, 255, 0, 255),
+            new Color32(0, 255, 255, 255),
+            new Color32(0, 0, 255, 255),
+            new Color32(75, 0, 130, 255),
+            new Color32(238, 130, 238, 255),
+            new Color32(255, 20, 147, 255),
+            new Color32(255, 0, 0, 255),
+            new Color32(128, 0, 0, 255),
+        };
         
         leftScore = 0;
         rightScore = 0;
@@ -52,6 +74,10 @@ public class BallLogic : MonoBehaviour
         
         leftScore = 0;
         rightScore = 0;
+
+        leftScoreText.color = colors[0];
+        rightScoreText.color = colors[0];
+        
         SetScores();
         leftWin.SetActive(false);
         rightWin.SetActive(false);
@@ -62,7 +88,7 @@ public class BallLogic : MonoBehaviour
     void AddStartingForce()
     {
         float x = currentLoser;
-        float z = UnityEngine.Random.value < 0.5f ? UnityEngine.Random.Range(-1.0f, -0.5f) : UnityEngine.Random.Range(0.5f, 1.0f);
+        float z = Random.value < 0.5f ? Random.Range(-1.0f, -0.5f) : Random.Range(0.5f, 1.0f);
 
         Vector3 direction = new Vector3(x, 0, z);
         rb.AddForce(direction * speed);
@@ -75,7 +101,11 @@ public class BallLogic : MonoBehaviour
 
     void SetScores()
     {
-        scores.text = leftScore.ToString() + " - " + rightScore.ToString();
+        leftScoreText.text = leftScore.ToString();
+        rightScoreText.text = rightScore.ToString();
+        
+        leftScoreText.color = colors[Mathf.Clamp(leftScore, 0, 10)];
+        rightScoreText.color = colors[Mathf.Clamp(rightScore, 0, 10)];
 
         if (leftScore == 11)
         {
